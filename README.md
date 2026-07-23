@@ -1,6 +1,6 @@
 # Repo3
 
-This is a test repository with sample data.
+This is a test repository with sample data
 
 ## Overview
 
