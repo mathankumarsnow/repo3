@@ -1,0 +1,46 @@
+name: create-servicenow-standard-change
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Application
+        run: echo "Build Successful"
+
+  create_change:
+    name: Create Standard Change
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ServiceNow Change
+
+        uses: ServiceNow/servicenow-devops-change@v7
+
+        with:
+          devops-integration-token: ${{ secrets.SN_DEVOPS_INTEGRATION_TOKEN }}
+          instance-url: ${{ secrets.SN_INSTANCE_URL }}
+          tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
+
+          context-github: ${{ toJSON(github) }}
+
+          job-name: "Create Standard Change"
+
+          change-request: >
+            {
+              "attributes": {
+                "type":"standard",
+                "priority":"4",
+                "assignment_group":"b85d44954a3623120004689b2d5dd60a",
+                "short_description":"GitHub Deployment Change"
+              }
+            }
