@@ -38,9 +38,11 @@ jobs:
           change-request: >
             {
               "attributes": {
+              "requested_by": {"name": "System Administrator"},
                 "type":"standard",
                 "priority":"4",
-                "assignment_group":"b85d44954a3623120004689b2d5dd60a",
-                "short_description":"GitHub Deployment Change"
+                "assignment_group": {"name": "CAB Approval"},
+                "short_description":"GitHub Deployment Change",
+"description": "Change created from Github"
               }
             }
