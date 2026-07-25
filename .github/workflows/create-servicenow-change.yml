@@ -43,6 +43,6 @@ jobs:
                 "priority":"4",
                 "assignment_group": {"name": "CAB Approval"},
                 "short_description":"GitHub Deployment Change",
-                "description": "Change created from Github"
+                "description":"Change created from Github"
               }
             }
