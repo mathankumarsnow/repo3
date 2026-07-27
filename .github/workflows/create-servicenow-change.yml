@@ -25,9 +25,9 @@ jobs:
         uses: ServiceNow/servicenow-devops-change@feature/https-proxy-agent
         with:
           # support multiple possible secret names for credentials
-          devops-integration-token: ${{ secrets.SNOW_TOKEN || secrets.SNOW_INTEGRATION_TOKEN || secrets.SNOW_API_TOKEN }}
-          instance-url: ${{ secrets.SNOW_URL || secrets.SNOW_INSTANCE_URL || secrets.SNOW_INSTANCE }}
-          tool-id: ${{ secrets.SNOW_TOOLID || secrets.SNOW_TOOL_ID || secrets.SNOW_TOOL }}
+          devops-integration-token: ${{ secrets.SN_DEVOPS_INTEGRATION_TOKEN || secrets.SNOW_TOKEN || secrets.SNOW_INTEGRATION_TOKEN || secrets.SNOW_API_TOKEN }}
+          instance-url: ${{ secrets.SNOW_URL || secrets.SN_INSTANCE_URL || secrets.SNOW_INSTANCE }}
+          tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID || secrets.SNOW_TOOLID || secrets.SNOW_TOOL_ID || secrets.SNOW_TOOL }}
           context-github: ${{ toJSON(github) }}
           job-name: 'ServiceNow DevOps Change'
           change-request: '{"setCloseCode":"true","attributes":{"short_description":"Test Deploy","description":"IGNORE  Deploy","implementation_plan":"Software update is tested and results ca[...]'
