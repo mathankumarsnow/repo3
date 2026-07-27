@@ -10,7 +10,6 @@ jobs:
     steps: 
       - name: 1step
         run: echo "Hello World!"        
-
         
   ServiceNowDevOpsChange:
     needs: helloWorld1
