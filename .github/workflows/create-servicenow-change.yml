@@ -1,48 +1,82 @@
 name: create-servicenow-standard-change
-
 on:
-  workflow_dispatch:
+   push:
+    branches: ["main"] 
 
 jobs:
+  helloWorld1:
+    name: helloWorld1
+    runs-on: ubuntu-latest 
+    steps: 
+      - name: 1step
+        run: echo "Hello World!"        
 
-  build:
-    name: Build
+        
+  ServiceNowDevOpsChange:
+    needs: helloWorld1
     runs-on: ubuntu-latest
-
+    name: ServiceNow DevOps Change 
+    env:
+      GITHUB_ACTOR: ${{ github.actor }}
+    outputs:
+      change_request_number: ${{ steps.extract_cr_number.outputs.cr_number }}
     steps:
-      - uses: actions/checkout@v5
+        - name: ServiceNow DevOps Change
+          #run: echo deployed 
+          uses: ServiceNow/servicenow-devops-change@feature/https-proxy-agent
+          with:
+              devops-integration-token: ${{ secrets.SNOW_TOKEN }}  
+              instance-url: ${{ secrets.SNOW_URL }}
+              tool-id: ${{ secrets.SNOW_TOOLID }}
+              context-github: ${{ toJSON(github) }}
+              job-name: 'ServiceNow DevOps Change'
+              change-request: '{"setCloseCode":"true","attributes":{"short_description":"Test Deploy","description":"IGNORE  Deploy","implementation_plan":"Software update is tested and results can be found in Test Summaries Tab; When the change is approved the implementation happens automated by the CICD pipeline within the change planned start and end time window.","backout_plan":"When software fails in production, the previous software release will be re-deployed.","test_plan":"Testing if the software was successfully deployed"}}'
+              interval: '10'
+              timeout: '60'
+              changeCreationTimeOut: '60'
+              abortOnChangeCreationFailure: false
+              abortOnChangeStepTimeout: false
+              deployment-gate: '{"environment":"Dev","jobName":"Send Change Request Notification Email"}'
+       
+  Send_Change_Request_Notification:
+   name: Send Change Request Notification Email
+   needs: ServiceNowDevOpsChange
+   runs-on: ubuntu-latest
+   environment: Dev
+   steps:
+      - name: ServiceNow DevOps deploy 
+        run: |
+          echo "This is run attempt #${{ github.run_attempt }}"
+        
+  Final_stage:
+   name: Final stage
+   needs: Send_Change_Request_Notification
+   runs-on: ubuntu-latest
+   steps:
+      - name: Echo 
+        run: |
+          echo "This is run attempt #${{ github.run_attempt }}"
+          if [ "${{ github.run_attempt }}" == "1" ]; then
+            echo "Simulating failure on first attempt"
+            exit 1
+          else
+            echo "deployed"
+          fi
 
-      - name: Build Application
-        run: echo "Build Successful"
+ 
+ 
 
-  create_change:
-    name: Create Standard Change
-    needs: build
 
-    runs-on: ubuntu-latest
 
-    steps:
-      - name: ServiceNow Change
 
-        uses: ServiceNow/servicenow-devops-change@v7.0.0
 
-        with:
-          devops-integration-token: ${{ secrets.SN_DEVOPS_INTEGRATION_TOKEN }}
-          instance-url: ${{ secrets.SN_INSTANCE_URL }}
-          tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
 
-          context-github: ${{ toJSON(github) }}
 
-          job-name: "Create Standard Change"
 
-          change-request: >
-            {
-              "attributes": {
-              "requested_by": {"name": "System Administrator"},
-                "type":"standard",
-                "priority":"4",
-                "assignment_group": {"name": "CAB Approval"},
-                "short_description":"GitHub Deployment Change",
-                "description":"Change created from Github"
-              }
-            }
+
+
+
+
+
+
+
