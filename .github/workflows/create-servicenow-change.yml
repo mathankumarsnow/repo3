@@ -1,58 +1,59 @@
 name: create-servicenow-standard-change
 on:
-   push:
-    branches: ["main"] 
+  push:
+    branches: ["main"]
 
 jobs:
   helloWorld1:
     name: helloWorld1
-    runs-on: ubuntu-latest 
-    steps: 
+    runs-on: ubuntu-latest
+    steps:
       - name: 1step
-        run: echo "Hello World!"        
-        
+        run: echo "Hello World!"
+
   ServiceNowDevOpsChange:
     needs: helloWorld1
     runs-on: ubuntu-latest
-    name: ServiceNow DevOps Change 
+    name: ServiceNow DevOps Change
     env:
       GITHUB_ACTOR: ${{ github.actor }}
     outputs:
       change_request_number: ${{ steps.extract_cr_number.outputs.cr_number }}
     steps:
-        - name: ServiceNow DevOps Change
-          #run: echo deployed 
-          uses: ServiceNow/servicenow-devops-change@feature/https-proxy-agent
-          with:
-              devops-integration-token: ${{ secrets.SNOW_TOKEN }}  
-              instance-url: ${{ secrets.SNOW_URL }}
-              tool-id: ${{ secrets.SNOW_TOOLID }}
-              context-github: ${{ toJSON(github) }}
-              job-name: 'ServiceNow DevOps Change'
-              change-request: '{"setCloseCode":"true","attributes":{"short_description":"Test Deploy","description":"IGNORE  Deploy","implementation_plan":"Software update is tested and results can be found in Test Summaries Tab; When the change is approved the implementation happens automated by the CICD pipeline within the change planned start and end time window.","backout_plan":"When software fails in production, the previous software release will be re-deployed.","test_plan":"Testing if the software was successfully deployed"}}'
-              interval: '10'
-              timeout: '60'
-              changeCreationTimeOut: '60'
-              abortOnChangeCreationFailure: false
-              abortOnChangeStepTimeout: false
-              deployment-gate: '{"environment":"Dev","jobName":"Send Change Request Notification Email"}'
-       
+      - name: ServiceNow DevOps Change
+        #run: echo deployed
+        uses: ServiceNow/servicenow-devops-change@feature/https-proxy-agent
+        with:
+          # support multiple possible secret names for credentials
+          devops-integration-token: ${{ secrets.SNOW_TOKEN || secrets.SNOW_INTEGRATION_TOKEN || secrets.SNOW_API_TOKEN }}
+          instance-url: ${{ secrets.SNOW_URL || secrets.SNOW_INSTANCE_URL || secrets.SNOW_INSTANCE }}
+          tool-id: ${{ secrets.SNOW_TOOLID || secrets.SNOW_TOOL_ID || secrets.SNOW_TOOL }}
+          context-github: ${{ toJSON(github) }}
+          job-name: 'ServiceNow DevOps Change'
+          change-request: '{"setCloseCode":"true","attributes":{"short_description":"Test Deploy","description":"IGNORE  Deploy","implementation_plan":"Software update is tested and results ca[...]'
+          interval: '10'
+          timeout: '60'
+          changeCreationTimeOut: '60'
+          abortOnChangeCreationFailure: false
+          abortOnChangeStepTimeout: false
+          deployment-gate: '{"environment":"Dev","jobName":"Send Change Request Notification Email"}'
+
   Send_Change_Request_Notification:
-   name: Send Change Request Notification Email
-   needs: ServiceNowDevOpsChange
-   runs-on: ubuntu-latest
-   environment: Dev
-   steps:
-      - name: ServiceNow DevOps deploy 
+    name: Send Change Request Notification Email
+    needs: ServiceNowDevOpsChange
+    runs-on: ubuntu-latest
+    environment: Dev
+    steps:
+      - name: ServiceNow DevOps deploy
         run: |
           echo "This is run attempt #${{ github.run_attempt }}"
-        
+
   Final_stage:
-   name: Final stage
-   needs: Send_Change_Request_Notification
-   runs-on: ubuntu-latest
-   steps:
-      - name: Echo 
+    name: Final stage
+    needs: Send_Change_Request_Notification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo
         run: |
           echo "This is run attempt #${{ github.run_attempt }}"
           if [ "${{ github.run_attempt }}" == "1" ]; then
@@ -61,21 +62,3 @@ jobs:
           else
             echo "deployed"
           fi
-
- 
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
